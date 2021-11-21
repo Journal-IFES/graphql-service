@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/Journal-IFES/graphql-service/internal/graphqlfields"
 	"github.com/Journal-IFES/graphql-service/internal/postgres"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
@@ -46,6 +48,14 @@ func main() {
 		syscall.SIGQUIT)
 
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
+		AllowMethods:     strings.Split(os.Getenv("ALLOWED_METHODS"), ","),
+		AllowHeaders:     strings.Split(os.Getenv("ALLOWED_HEADERS"), ","),
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+	}))
 
 	s := &http.Server{
 		Addr:           ":8081",
