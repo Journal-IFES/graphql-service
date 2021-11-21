@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -57,15 +59,25 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	servicePort, err := strconv.Atoi(os.Getenv("GRAPHQL_SERVICE_PORT"))
+	if err != nil {
+		panic(err)
+	}
+
 	s := &http.Server{
-		Addr:           ":8081",
+		Addr:           fmt.Sprintf(":%d", servicePort),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	err := postgres.InitPostgresDB("postgres://jifes:12345@127.0.0.1/jifes?sslmode=disable")
+	postgresPort, err := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
+	if err != nil {
+		panic(err)
+	}
+
+	err = postgres.InitPostgresDB(fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s", os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWD"), os.Getenv("POSTGRES_HOST"), postgresPort, os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_SSLMODE")))
 	if err != nil {
 		panic(err)
 	}
