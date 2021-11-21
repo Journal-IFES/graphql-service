@@ -12,14 +12,14 @@ jobs:
           command: go mod download
       - run:
           name: Build it
-          command: go build -o graphql-service cmd/main.go
+          command: go build -o graphql-service-$CIRCLE_SHA1 cmd/main.go
       - setup_remote_docker
       - run:
           name: Build image and run service
           command: |
             TAG=0.1.$CIRCLE_SHA1
             docker build -t $DOCKER_REGISTRY/graphql-service:$TAG .
-            docker run -e ALLOWED_ORIGINS=$ALLOWED_ORIGINS -e ALLOWED_METHODS=$ALLOWED_METHODS -e ALLOWED_HEADERS=$ALLOWED_HEADERS -e GRAPHQL_SERVICE_PORT=$GRAPHQL_SERVICE_PORT --rm -p 127.0.0.1:$GRAPHQL_SERVICE_PORT:$GRAPHQL_SERVICE_PORT -d $DOCKER_REGISTRY/graphql-service:$TAG
+            docker run --entrypoint graphql-service-$CIRCLE_SHA1 -e ALLOWED_ORIGINS=$ALLOWED_ORIGINS -e ALLOWED_METHODS=$ALLOWED_METHODS -e ALLOWED_HEADERS=$ALLOWED_HEADERS -e GRAPHQL_SERVICE_PORT=$GRAPHQL_SERVICE_PORT --rm -p 127.0.0.1:$GRAPHQL_SERVICE_PORT:$GRAPHQL_SERVICE_PORT -d $DOCKER_REGISTRY/graphql-service:$TAG
           environment:
             ALLOWED_ORIGINS: "*"
             ALLOWED_METHODS: "*"
