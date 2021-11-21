@@ -1,0 +1,43 @@
+version: 2.1
+
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      - image: circleci/golang:1.15.8
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go mod download
+      - run:
+          name: Build it
+          command: go build -o /app/graphql-service cmd/main.go
+      - setup_remote_docker
+      - run:
+        name: Build image and run service
+        command: |
+          TAG=0.1.$CIRCLE_SHA1
+          docker build -t $DOCKER_REGISTRY/graphql-service:$TAG .
+          docker run -e ALLOWED_ORIGINS=$ALLOWED_ORIGINS -e ALLOWED_METHODS=$ALLOWED_METHODS -e ALLOWED_HEADERS=$ALLOWED_HEADERS -e GRAPHQL_SERVICE_PORT=$GRAPHQL_SERVICE_PORT --rm -p 127.0.0.1:$GRAPHQL_SERVICE_PORT:$GRAPHQL_SERVICE_PORT -d $DOCKER_REGISTRY/graphql-service:$TAG
+        environment:
+          ALLOWED_ORIGINS: "*"
+          ALLOWED_METHODS: "*"
+          ALLOWED_HEADERS: "*"
+          GRAPHQL_SERVICE_PORT: 8080
+      - run:
+        name: Test service with curl
+        command: |
+          curl --connect-timeout 5 --max-time 10 --retry 3 --retry-delay 0 --retry-max-time 30 -X GET 127.0.0.1:$GRAPHQL_SERVICE_PORT
+        environment:
+          GRAPHQL_SERVICE_PORT: 8080
+      - run:
+        name: Push image to registry
+        command: |
+          TAG=0.1.$CIRCLE_SHA1
+          docker login $DOCKER_REGISTRY -u nologin -p $DOCKER_REGISTRY_SECRET
+          docker push $DOCKER_REGISTRY/graphql-service:$TAG
+workflows:
+  build_and_deploy:
+    jobs:
+      - build
