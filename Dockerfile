@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine
+FROM alpine:edge
 
 ARG COMMIT
 
