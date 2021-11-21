@@ -12,7 +12,7 @@ jobs:
           command: go mod download
       - run:
           name: Build it
-          command: go build -o graphql-service cmd/main.go
+          command: go build -o $CIRCLE_WORKING_DIRECTORY/graphql-service cmd/main.go
       - setup_remote_docker
       - run:
           name: Build image and run service
