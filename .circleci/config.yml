@@ -2,7 +2,7 @@ version: 2.1
 
 jobs:
   build:
-    working_directory: /app
+    working_directory: ~/app
     docker:
       - image: circleci/golang:1.15.8
     steps:
@@ -12,7 +12,7 @@ jobs:
           command: go mod download
       - run:
           name: Build it
-          command: go build -o /app/graphql-service cmd/main.go
+          command: go build -o $CIRCLE_WORKING_DIRECTORY/graphql-service cmd/main.go
       - setup_remote_docker
       - run:
           name: Build image and run service
