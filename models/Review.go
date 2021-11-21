@@ -42,15 +42,18 @@ func GetReviewById(id int) (*ReviewStruct, error) {
 
 var ReviewType graphql.Object = *graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "Review",
+		Name:        "Review",
+		Description: "Definição do tipo revisão no banco de dados.",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Name: "id",
-				Type: graphql.NewNonNull(graphql.Int),
+				Name:        "id",
+				Type:        graphql.NewNonNull(graphql.Int),
+				Description: "Identificador único da revisão no banco de dados.",
 			},
 			"by": &graphql.Field{
-				Name: "by",
-				Type: graphql.NewNonNull(&UserType),
+				Name:        "by",
+				Type:        graphql.NewNonNull(&UserType),
+				Description: "Identificador único do usuário que fez a revisão.",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					id := p.Source.(*ReviewStruct).By
 
@@ -58,15 +61,17 @@ var ReviewType graphql.Object = *graphql.NewObject(
 				},
 			},
 			"comment": &graphql.Field{
-				Name: "comment",
-				Type: graphql.NewNonNull(graphql.String),
+				Name:        "comment",
+				Type:        graphql.NewNonNull(graphql.String),
+				Description: "Comentário referente ao que foi revisado.",
 			},
 		},
 	})
 
 var ReviewField graphql.Field = graphql.Field{
-	Name: "review",
-	Type: &ReviewType,
+	Name:        "review",
+	Type:        &ReviewType,
+	Description: "Busca revisão no banco de dados.",
 	Args: graphql.FieldConfigArgument{
 		"id": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.Int),

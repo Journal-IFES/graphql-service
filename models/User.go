@@ -278,4 +278,39 @@ var UserMutation graphql.Fields = graphql.Fields{
 			return &r, nil
 		},
 	},
+	"listUsers": &graphql.Field{
+		Name:        "listUsers",
+		Description: "Lista os usuários no banco de dados.",
+		Type:        graphql.NewList(&UserType),
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			db := postgres.GetPostgresDB()
+
+			rows, err := db.Query(`
+			SELECT *
+			FROM userr
+			`)
+			if err != nil {
+				return nil, err
+			}
+
+			lst := make([]*UserStruct, 0)
+
+			for rows.Next() {
+				r := UserStruct{}
+
+				rows.Scan(
+					&r.Id,
+					&r.Firstname,
+					&r.Surname,
+					&r.Join_date,
+					&r.Hierarchy,
+					&r.Activated,
+				)
+
+				lst = append(lst, &r)
+			}
+
+			return &lst, nil
+		},
+	},
 }
