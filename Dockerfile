@@ -1,4 +1,6 @@
 FROM golang:1.17-alpine
 
-COPY ./graphql-service /app
-ENTRYPOINT [ "/app/graphql-service" ]
+ARG COMMIT
+
+COPY "./graphql-service-${COMMIT}" /app
+ENTRYPOINT [ "/app/graphql-service-${COMMIT}" ]
